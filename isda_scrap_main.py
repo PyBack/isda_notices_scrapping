@@ -10,6 +10,9 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 
+logger = logging.getLogger(__file__)
+
+
 def get_article_data_list(list_url):
     try:
         response = requests.get(list_url)
@@ -29,7 +32,7 @@ def get_article_data_list(list_url):
                 published_date = published_date.text
             published_date = published_date.replace('\n', '').replace('\t', '')
             published_date = dt.datetime.strptime(published_date, '%B %d, %Y')
-            published_date = published_date.strftime("%Y-%m-%d")
+            published_date = published_date.strftime("%Y%m%d")
 
             subcategory_name = entry_meta.find('a').text
             subcategory_link = entry_meta.find('a').attrs['href']
@@ -69,7 +72,32 @@ for sub_url in sub_url_list:
     list_url = base_url + sub_url
     article_data_list = article_data_list + get_article_data_list(list_url)
 
-df = pd.DataFrame(article_data_list, columns=['pub_date', 'subcategory', 'title', 'tags_list', 'url'])
-df = df.drop_duplicates('title')
-df = df.sort_values('pub_date', ascending=False)
-df.to_csv('isda_simm.csv', sep='|', index=False)
+df_new = pd.DataFrame(article_data_list, columns=['pub_date', 'subcategory', 'title', 'tags_list', 'url'])
+df_new = df_new.drop_duplicates('title')
+df_new = df_new.sort_values('pub_date', ascending=False)
+# df_new.to_csv('isda_simm.csv', sep='|', index=False)
+
+df_old = pd.read_csv('isda_simm.csv', sep='|')
+max_date_old = str(df_old.pub_date.max())
+max_date_new = df_new.pub_date.max()
+
+print('max_date_old', max_date_old)
+print('max_date_new', max_date_new)
+
+df_new_only = pd.DataFrame()
+if max_date_new > max_date_old:
+    df_new_only = df_new[df_new.pub_date > max_date_old]
+
+    df = pd.concat([df_new, df_old])
+    df = df.drop_duplicates('title')
+    df = df.sort_values('pub_date', ascending=False)
+    df.to_csv('isda_simm.csv', sep='|', index=False)
+else:
+    df = df_old.copy()
+
+print('==== ISDA SIMM New Notices ====')
+print(df_new_only)
+print()
+print('==== ISADA SIMM Recent 5 Notices ====')
+print(df[['pub_date', 'subcategory', 'title']].head())
+
