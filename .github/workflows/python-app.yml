@@ -28,15 +28,20 @@ jobs:
     - name: Run Scripts
       run: |
         python isda_scrap_main.py
-    - name: Commits
+    - name: Check for changes
+      id: changes
+      run: |
+        git diff --exit-code || echo "::set-output name=changes::true"
+    - name: Commits & Push
+      if: steps.changes.outputs.changes == 'true'
       run: |
         git config --local user.email "ggtt7@naver.com"
         git config --local user.name "PyBack"
         git add .
-        git commit -m "Auto - daliy scrap"
-        git push origin main
-    - name: Push
-      uses: ad-m/github-push-action@master
-      with:
-        branch: 'main'
-        github_token: $
+        git commit -m "[Auto-Commit] daily scrap"
+        git push -u origin main
+#    - name: Push
+#      uses: ad-m/github-push-action@master
+#      with:
+#        branch: 'main'
+#        github_token: $
