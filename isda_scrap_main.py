@@ -50,7 +50,7 @@ def get_article_data_list(list_url):
             tags_list_text = ','.join(tags_list)
 
             article_data = [published_date, subcategory_name, entry_title_text, tags_list_text, entry_link]
-            print(article_data)
+            # print(article_data)
 
             article_data_list.append(article_data)
 
