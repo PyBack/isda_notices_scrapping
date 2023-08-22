@@ -2,6 +2,12 @@ import os
 import logging
 import traceback
 import datetime as dt
+import smtplib
+
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
 
 import pandas as pd
 import requests
@@ -64,22 +70,28 @@ def get_article_data_list(list_url):
     return article_data_list
 
 
-base_url = 'https://www.isda.org'
-sub_url_list = ['/category/margin/isda-simm',
-                '/tag/isda-simm/',
-                '/tag/simm', ]
+def get_isda_new_articles():
+    base_url = 'https://www.isda.org'
+    sub_url_list = ['/category/margin/isda-simm',
+                    '/tag/isda-simm/',
+                    '/tag/simm', ]
 
-article_data_list = []
-for sub_url in sub_url_list:
-    list_url = base_url + sub_url
-    article_data_list = article_data_list + get_article_data_list(list_url)
+    article_data_list = []
+    for sub_url in sub_url_list:
+        list_url = base_url + sub_url
+        article_data_list = article_data_list + get_article_data_list(list_url)
 
-df_new = pd.DataFrame(article_data_list, columns=['pub_date', 'subcategory', 'title', 'tags_list', 'url'])
-df_new = df_new.drop_duplicates('title')
-df_new = df_new.sort_values('pub_date', ascending=False)
-# df_new.to_csv('isda_simm.csv', sep='|', index=False)
+    df_new = pd.DataFrame(article_data_list, columns=['pub_date', 'subcategory', 'title', 'tags_list', 'url'])
+    df_new = df_new.drop_duplicates('title')
+    df_new = df_new.sort_values('pub_date', ascending=False)
+    # df_new.to_csv('isda_simm.csv', sep='|', index=False)
 
+    return df_new
+
+
+df_new = get_isda_new_articles()
 df_old = pd.read_csv('isda_simm.csv', sep='|')
+
 max_date_old = str(df_old.pub_date.max())
 max_date_new = df_new.pub_date.max()
 
@@ -97,9 +109,14 @@ if max_date_new > max_date_old:
 else:
     df = df_old.copy()
 
-print('==== ISDA SIMM New Notices ====')
-print(df_new_only)
-print()
-print('==== ISADA SIMM Recent 5 Notices ====')
-print(df[['pub_date', 'subcategory', 'title']].head())
+# pd.set_option('display.max_colwidth', None)
 
+main_text = f"""
+==== ISDA SIMM New Notices ====
+{df_new_only}
+
+==== ISADA SIMM Recent 5 Notices ====
+{df[['pub_date', 'subcategory', 'title']].iloc[:5].to_string()}
+"""
+
+print(main_text)
