@@ -22,7 +22,9 @@ def get_article_data_list(list_url):
         article_list = soup.find_all('article', {'class': "two-col-content-panel"})
         article_data_list = []
 
-        for article in tqdm(article_list):
+        print('article cnt:', len(article_list))
+
+        for article in article_list:
             entry_meta = article.find('div', {'class': 'entry-meta'})
             published_date = entry_meta.find('span', {'class': 'published-date'})
             if published_date is None:
