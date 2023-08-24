@@ -117,7 +117,7 @@ def main(args):
     """
 
     print(main_text)
-    send_mail('ggtt7@naver.com', pwd=args.pwd,
+    send_mail('ggtt7@naver.com', pwd=args.pwd + "()",
               to_mail_list=['ggtt7@naver.com', 'hj.edward.kim@kbfg.com'],
               mail_title='ISDA SIMM Notices',
               mail_text=main_text
