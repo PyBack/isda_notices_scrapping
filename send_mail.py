@@ -48,6 +48,7 @@ def send_mail(mail_accnt: str, pwd: str, to_mail_list: list,
 
     # 메일 전송
     mail_server.sendmail(mail_accnt, to_mail_list, msg.as_string())
+    print(f"send mail: {mail_title}")
 
     mail_server.quit()
 

@@ -10,6 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 
+from send_mail import send_mail
 
 logger = logging.getLogger(__file__)
 
@@ -84,34 +85,54 @@ def get_isda_new_articles():
     return df_new
 
 
-df_new = get_isda_new_articles()
-df_old = pd.read_csv('isda_simm.csv', sep='|')
+def main(args):
+    df_new = get_isda_new_articles()
+    df_old = pd.read_csv('isda_simm.csv', sep='|')
 
-max_date_old = str(df_old.pub_date.max())
-max_date_new = df_new.pub_date.max()
+    max_date_old = str(df_old.pub_date.max())
+    max_date_new = df_new.pub_date.max()
 
-print('max_date_old', max_date_old)
-print('max_date_new', max_date_new)
+    print('max_date_old', max_date_old)
+    print('max_date_new', max_date_new)
 
-df_new_only = pd.DataFrame()
-if max_date_new > max_date_old:
-    df_new_only = df_new[df_new.pub_date > max_date_old]
+    df_new_only = pd.DataFrame()
+    if max_date_new > max_date_old:
+        df_new_only = df_new[df_new.pub_date > max_date_old]
 
-    df = pd.concat([df_new, df_old])
-    df = df.drop_duplicates('title')
-    df = df.sort_values('pub_date', ascending=False)
-    df.to_csv('isda_simm.csv', sep='|', index=False)
-else:
-    df = df_old.copy()
+        df = pd.concat([df_new, df_old])
+        df = df.drop_duplicates('title')
+        df = df.sort_values('pub_date', ascending=False)
+        df.to_csv('isda_simm.csv', sep='|', index=False)
+    else:
+        df = df_old.copy()
 
-# pd.set_option('display.max_colwidth', None)
+    # pd.set_option('display.max_colwidth', None)
 
-main_text = f"""
-==== ISDA SIMM New Notices ====
-{df_new_only}
+    main_text = f"""
+    ==== ISDA SIMM New Notices ====
+    {df_new_only}
+    
+    ==== ISADA SIMM Recent 5 Notices ====
+    {df[['pub_date', 'subcategory', 'title']].iloc[:5].to_string()}
+    """
 
-==== ISADA SIMM Recent 5 Notices ====
-{df[['pub_date', 'subcategory', 'title']].iloc[:5].to_string()}
-"""
+    print(main_text)
+    send_mail('ggtt7@naver.com', pwd=args.pwd,
+              to_mail_list=['ggtt7@naver.com', 'hj.edward.kim@kbfg.com'],
+              mail_title='ISDA SIMM Notices',
+              mail_text=main_text
+              )
 
-print(main_text)
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--pwd",
+        type=str,
+        default="",
+    )
+
+    args = parser.parse_args()
+    main(args)

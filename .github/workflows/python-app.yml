@@ -27,7 +27,7 @@ jobs:
         python -m pip install -r requirements.txt
     - name: Run Scripts
       run: |
-        python isda_scrap_main.py
+        python isda_scrap_main.py --pwd ${{secrets.NVR_MAIL_PWD}}
     - name: Check for changes
       id: changes
       run: |
