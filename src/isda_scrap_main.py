@@ -1,4 +1,5 @@
 import os
+import site
 import logging
 import traceback
 import datetime as dt
@@ -9,6 +10,13 @@ import requests
 
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+
+src_path = os.path.dirname(__file__)
+pjt_home_path = os.path.join(src_path, os.pardir)
+pjt_home_path = os.path.abspath(pjt_home_path)
+
+site.addsitedir(pjt_home_path)
+site.addsitedir(pjt_home_path + '/src')
 
 from send_mail import send_mail
 
@@ -88,7 +96,7 @@ def get_isda_new_articles():
 
 def main(args):
     df_new = get_isda_new_articles()
-    df_old = pd.read_csv('isda_simm.csv', sep='|')
+    df_old = pd.read_csv(pjt_home_path + '/data/isda_simm.csv', sep='|')
 
     max_date_old = str(df_old.pub_date.max())
     max_date_new = df_new.pub_date.max()
@@ -104,7 +112,7 @@ def main(args):
         df = df.drop_duplicates('title')
         df['pub_date'] = df['pub_date'].astype(str)
         df = df.sort_values('pub_date', ascending=False)
-        df.to_csv('isda_simm.csv', sep='|', index=False)
+        df.to_csv(pjt_home_path + '/data/isda_simm.csv', sep='|', index=False)
     else:
         df = df_old.copy()
 
