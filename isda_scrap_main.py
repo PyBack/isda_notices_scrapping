@@ -79,6 +79,7 @@ def get_isda_new_articles():
 
     df_new = pd.DataFrame(article_data_list, columns=['pub_date', 'subcategory', 'title', 'tags_list', 'url'])
     df_new = df_new.drop_duplicates('title')
+    df_new['pub_date'] = df_new['pub_date'].astype(str)
     df_new = df_new.sort_values('pub_date', ascending=False)
     # df_new.to_csv('isda_simm.csv', sep='|', index=False)
 
@@ -101,6 +102,7 @@ def main(args):
 
         df = pd.concat([df_new, df_old])
         df = df.drop_duplicates('title')
+        df['pub_date'] = df['pub_date'].astype(str)
         df = df.sort_values('pub_date', ascending=False)
         df.to_csv('isda_simm.csv', sep='|', index=False)
     else:
