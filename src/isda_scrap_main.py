@@ -122,7 +122,7 @@ def main(args):
     ==== ISDA SIMM New Notices ====
     {df_new_only}
     
-    ==== ISADA SIMM Recent 5 Notices ====
+    ==== ISDA SIMM Recent 5 Notices ====
     {df[['pub_date', 'subcategory', 'title']].iloc[:5].to_string()}
     """
 
